@@ -1,0 +1,39 @@
+# See also
+# https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsSchema.ts
+enum Episode {
+  NEW_HOPE
+  EMPIRE
+  JEDI
+}
+
+interface Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+  secretBackstory: String
+}
+
+type Human implements Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+  secretBackstory: String
+  homePlanet: String
+}
+
+type Droid implements Character {
+  id: String!
+  name: String
+  friends: [Character]
+  appearsIn: [Episode]
+  secretBackstory: String
+  primaryFunction: String
+}
+
+type Query {
+  hero(episode: Episode): Character
+  human(id: String!): Human
+  droid(id: String!): Droid
+}
