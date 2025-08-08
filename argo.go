@@ -1,12 +1,13 @@
 package argo
 
 import (
+	"github.com/elliotchance/orderedmap/v3"
+
 	"github.com/beeper/argo-go/codec"
 	"github.com/beeper/argo-go/header"
 	"github.com/beeper/argo-go/pkg/buf"
 	"github.com/beeper/argo-go/typer"
 	"github.com/beeper/argo-go/wire"
-	"github.com/elliotchance/orderedmap/v3"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )

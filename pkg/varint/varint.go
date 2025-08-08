@@ -147,8 +147,8 @@ func UnsignedDecode(buf []byte, offset int) (result *big.Int, length int, err er
 		// Max shift for data in the 37th byte is (37-1)*7 = 252.
 		// shift > 252 indicates processing beyond the 37th byte.
 		// (pos - offset) > 37 indicates more than 37 bytes read.
-		if shift > 252 && (pos-offset) > 37 {
-			return nil, 0, errors.New("varint: varint data exceeds 37-byte limit (expected for up to 256-bit numbers)")
+		if shift > 63 && (pos-offset) > 9 {
+			return nil, 0, errors.New("varint: varint too large for 64-bit")
 		}
 	}
 }
@@ -157,13 +157,14 @@ func UnsignedDecode(buf []byte, offset int) (result *big.Int, length int, err er
 
 // toZigZag converts a signed integer n to an unsigned integer suitable for ULEB128 encoding.
 func toZigZag(n *big.Int) *big.Int {
-	res := new(big.Int)
-	res.Lsh(n, 1)
+	if n.BitLen() > 63 { // keep parity with Erlang’s 64-bit limit
+		panic("varint: value out of int64 range")
+	}
+	res := new(big.Int).Lsh(n, 1)
 	if n.Sign() < 0 {
-		// ^ (~0) which is XOR with -1 for big.Int
 		res.Xor(res, bigNeg1)
 	}
-	return res
+	return res.And(res, big.NewInt(0).SetUint64(^uint64(0))) // mask 64 bits
 }
 
 // fromZigZag converts an unsigned integer n (decoded from ULEB128) back to a signed integer.
