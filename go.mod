@@ -1,6 +1,6 @@
 module github.com/beeper/argo-go
 
-go 1.24.3
+go 1.23.0
 
 require (
 	github.com/elliotchance/orderedmap/v3 v3.1.0
