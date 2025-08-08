@@ -169,19 +169,14 @@ func (d *Decoder) decodeScalarWireType() (wire.Type, error) {
 	switch {
 	case label.WireTypeMarkerString.Is(lbl):
 		return wire.String, nil
-
 	case label.WireTypeMarkerBoolean.Is(lbl):
 		return wire.Boolean, nil
-
 	case label.WireTypeMarkerVarint.Is(lbl):
 		return wire.Varint, nil
-
 	case label.WireTypeMarkerFloat64.Is(lbl):
 		return wire.Float64, nil
-
 	case label.WireTypeMarkerBytes.Is(lbl):
 		return wire.Bytes, nil
-
 	case label.WireTypeMarkerFixed.Is(lbl):
 		lenLbl, err := label.Read(d.r)
 		if err != nil {
@@ -192,11 +187,9 @@ func (d *Decoder) decodeScalarWireType() (wire.Type, error) {
 			return nil, fmt.Errorf("wirecodec: negative FIXED length %d", n)
 		}
 		return wire.FixedType{Length: n}, nil
-
 	case label.WireTypeMarkerDesc.Is(lbl):
 		return wire.Desc, nil
 	}
-
 	return nil, fmt.Errorf("wirecodec: invalid scalar wire-type label %s", lbl.Value().String())
 }
 
