@@ -52,6 +52,8 @@ const (
 	TypeKeyRecord TypeKey = "RECORD"
 	// TypeKeyDesc represents a self-describing value, where the value itself carries its type information.
 	TypeKeyDesc TypeKey = "DESC"
+	// TypeKeyExtensions represents an extension
+	TypeKeyExtensions TypeKey = "EXTENSIONS"
 )
 
 // AbsentValue is a sentinel value used to indicate that an omittable field in a RecordType
@@ -129,18 +131,27 @@ type DescType struct{}
 func (DescType) GetTypeKey() TypeKey { return TypeKeyDesc }
 func (DescType) isWireType()         {}
 
+// ExtensionsType represents the Argo wire type for extensions.
+// It implements the Type interface.
+// Use the global Extensions instance for this type.
+type ExtensionsType struct{}
+
+func (ExtensionsType) GetTypeKey() TypeKey { return TypeKeyExtensions }
+func (ExtensionsType) isWireType()         {}
+
 // --- Global instances of primitive types ---
 
 // Global pre-allocated instances of primitive wire types.
 // These should be used instead of creating new zero-value structs of these types.
 var (
-	String  Type = StringType{}  // String is the global instance of StringType.
-	Boolean Type = BooleanType{} // Boolean is the global instance of BooleanType.
-	Varint  Type = VarintType{}  // Varint is the global instance of VarintType.
-	Float64 Type = Float64Type{} // Float64 is the global instance of Float64Type.
-	Bytes   Type = BytesType{}   // Bytes is the global instance of BytesType.
-	Path    Type = PathType{}    // Path is the global instance of PathType.
-	Desc    Type = DescType{}    // Desc is the global instance of DescType.
+	String     Type = StringType{}  // String is the global instance of StringType.
+	Boolean    Type = BooleanType{} // Boolean is the global instance of BooleanType.
+	Varint     Type = VarintType{}  // Varint is the global instance of VarintType.
+	Float64    Type = Float64Type{} // Float64 is the global instance of Float64Type.
+	Bytes      Type = BytesType{}   // Bytes is the global instance of BytesType.
+	Path       Type = PathType{}    // Path is the global instance of PathType.
+	Desc       Type = DescType{}    // Desc is the global instance of DescType.
+	Extensions Type = ExtensionsType{}
 )
 
 // --- Compound Types ---
@@ -377,7 +388,7 @@ func printRecursive(wt Type, indent int) string {
 
 	inner := func() string {
 		switch t := wt.(type) {
-		case StringType, VarintType, BooleanType, Float64Type, BytesType, PathType, DescType:
+		case StringType, VarintType, BooleanType, Float64Type, BytesType, PathType, DescType, ExtensionsType:
 			return string(t.GetTypeKey())
 		case NullableType:
 			// The TS version `recurse(wt.of) + '?'` implies the recursed string includes its own indent.

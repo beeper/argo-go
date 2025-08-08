@@ -11,14 +11,15 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/elliotchance/orderedmap/v3"
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/beeper/argo-go/block"
 	"github.com/beeper/argo-go/header"
 	"github.com/beeper/argo-go/internal/util"
 	"github.com/beeper/argo-go/label"
 	"github.com/beeper/argo-go/pkg/buf"
 	"github.com/beeper/argo-go/wire"
-	"github.com/elliotchance/orderedmap/v3"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // anyBlockReader defines an interface for a generic block reader.
@@ -77,27 +78,21 @@ func NewArgoDecoder(messageBuf buf.Read) (*ArgoDecoder, error) {
 // structure of the data. If the Argo message header indicates it is self-describing,
 // the provided `wt` is overridden by `wire.Desc`.
 func (ad *ArgoDecoder) ArgoToMap(wt wire.Type) (*orderedmap.OrderedMap[string, interface{}], error) {
-	var result interface{}
-	var err error
-
 	finalWt := wt
-	if ad.slicer.Header().GetFlag(header.HeaderSelfDescribingFlag) {
+
+	if _, wantDesc := wt.(wire.DescType); wantDesc && ad.slicer.Header().GetFlag(header.HeaderSelfDescribingFlag) {
 		finalWt = wire.Desc
 	}
 
-	// Ensure that the core buffer's position is reset if it's read multiple times
 	if p, ok := ad.slicer.Core().(buf.BufPosition); ok {
 		p.SetPosition(0)
 	}
-
-	result, err = ad.readArgo(ad.slicer.Core(), nil, finalWt, nil)
-
+	result, err := ad.readArgo(ad.slicer.Core(), nil, finalWt, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	if resultMap, ok := result.(*orderedmap.OrderedMap[string, interface{}]); ok {
-		return resultMap, nil
+	if m, ok := result.(*orderedmap.OrderedMap[string, interface{}]); ok {
+		return m, nil
 	}
 	return nil, fmt.Errorf("decoded result is not an ordered map, got %T", result)
 }
